@@ -1,79 +1,88 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/DtxdB3_i)
-## 🧠 Task Overview
+# Experiment Summary
 
-You will apply **Transfer Learning** using **EfficientNet** models with two approaches:  
-1. **Feature Extraction**  
-2. **Fine-tuning**
+Two transfer learning experiments were performed using **EfficientNetB0** on the **Food11 dataset**.
 
-⚠️ This task **must be completed in Google Colab or a cloud-based environment**. Training deep models like EfficientNet on local machines without GPU/TPU is highly inefficient and may lead to failed or incomplete experiments.
+### Experiment 1 — Feature Extraction
 
+* Backbone: EfficientNetB0 (ImageNet pretrained)
+* Base model layers: **Frozen**
+* Trainable layers: **Classification head only**
+* Learning rate: **0.001**
+* Epochs: **10**
 
+**Result**
 
-## 📁 Dataset
+* Validation Accuracy: **89.91%**
+* Validation Loss: **0.3194**
 
-Dataset is already downloaded and loaded in the notebook. Preprocess as needed for training.
+---
 
+### Experiment 2 — Fine-Tuning
 
+* Backbone: EfficientNetB0
+* Last **30 layers unfrozen**
+* Learning rate: **0.00001**
+* Epochs: **10**
 
-## 🧪 Experiments
+**Result**
 
-### 1️⃣ Feature Extraction  
-- freeze all base layers  
-- train only the classification head  
+* Validation Accuracy: **90.84%**
+* Validation Loss: **0.2931**
 
-### 2️⃣ Fine-tuning  
-- unfreeze last layers  
-- retrain full or partial base  
+Fine-tuning slightly improved performance compared to feature extraction.
 
-You can enhance fine-tuning with these techniques:
+---
 
-- **Unfreeze only last *n* layers**  
-  gradually increase trainable layers instead of full base model
+# Plots for Metrics
 
-- **Gradual unfreezing**  
-  unfreeze layers one block at a time across training epochs
+### Feature Extraction Training Curves
 
-- **Layer-wise learning rate decay**  
-  assign smaller LR to earlier layers and higher LR to deeper layers
+Training and validation accuracy and loss:
 
-For each:
-- document model version  
-- include training/validation metrics  
-- write your analysis
+![Feature Extraction Metrics](feature_extraction_metrics.png)
 
+---
 
+### Fine-Tuning Training Curves
 
-## 🧬 Bonus (Optional)
+Training and validation accuracy and loss:
 
-- use **DagsHub** to upload and manage dataset in a cloud bucket  
-- track all runs using **MLflow**:
-  - versioned experiments  
-  - parameters, metrics, artifacts  
+![Fine Tuning Metrics](finetuning_metrics.png)
 
-## 📝 README Must Include:
+---
 
-- experiment summary  
-- plots for metrics  
-- observations on:
-  - feature extract vs fine-tune  
-  - generalization, convergence, overfitting 
+# Observations
 
-## 🔗 Helpful Links
+## Feature Extraction vs Fine-Tuning
 
-- 📚 EfficientNet models in Keras:  
-  https://keras.io/api/applications/efficientnet/
+Feature extraction uses the pretrained EfficientNet backbone without updating its weights and only trains the classifier layer. This approach trains faster and has a lower risk of overfitting.
 
-- 🎓 Transfer Learning guide (Keras):  
-  https://keras.io/guides/transfer_learning/
+Fine-tuning allows the model to update some layers of the pretrained network, which helps the model adapt better to the dataset. In this project, unfreezing the last 30 layers improved validation accuracy from **89.91% to 90.84%**.
 
-- 📦 MLflow for experiment tracking:  
-  https://www.mlflow.org/docs/latest/index.html
+Feature extraction is useful for a fast baseline, while fine-tuning usually produces better final performance.
 
-- ☁️ DVC + DagsHub integration:  
-  https://dagshub.com/docs/integrations/dvc/
+---
 
-- 🧑‍🍳 How to freeze/unfreeze layers in Keras:  
-  https://keras.io/getting_started/faq/#how-can-i-freeze-layers-in-a-model
+## Generalization
 
-- 📈 Using callbacks in Keras (e.g. EarlyStopping, ReduceLROnPlateau):  
-  https://keras.io/api/callbacks/
+Generalization refers to how well the model performs on unseen validation data.
+
+In this project, validation accuracy remained close to training accuracy and validation loss decreased steadily during training. This indicates that the model generalized well to unseen data.
+
+Data augmentation and transfer learning helped improve generalization.
+
+---
+
+## Convergence
+
+Convergence describes how quickly the model learns during training.
+
+Feature extraction converged faster because only the classifier head was trained. Fine-tuning required a smaller learning rate and converged more gradually since more parameters were updated.
+
+---
+
+## Overfitting
+
+Overfitting occurs when training accuracy continues improving while validation performance stops improving or worsens.
+
+In this project, training and validation curves improved together and validation loss did not increase significantly. Early stopping and learning rate reduction helped prevent overfitting during training.
